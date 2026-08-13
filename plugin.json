@@ -1,0 +1,19 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "ryu.finetune",
+  "version": "1.0.0",
+  "description": "A LoRA/QLoRA training studio: launch fine-tune jobs on this node's GPU or a remote Ryu Cloud GPU node, track them durably, merge the trained adapter to GGUF, and register the result as a swappable local model.",
+  "keywords": [
+    "finetune",
+    "lora",
+    "training",
+    "gpu",
+    "models"
+  ],
+  "extensions": {
+    "com.ryuhq.ryu": {
+      "id": "@ryu/finetune",
+      "displayName": "Fine-tuning"
+    }
+  }
+}
