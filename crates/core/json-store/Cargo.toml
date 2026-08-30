@@ -1,0 +1,16 @@
+[package]
+name = "ryu-json-store"
+version = "0.2.3"
+edition = "2021"
+license = "Apache-2.0"
+description = "Small corruption-safe atomic JSON file store primitive shared by Ryu Core crates."
+repository = "https://github.com/amajorai/ryu"
+
+[dependencies]
+anyhow = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tempfile = "3"
+
+[dev-dependencies]
+tempfile = "3"
