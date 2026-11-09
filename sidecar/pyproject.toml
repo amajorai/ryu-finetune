@@ -1,0 +1,44 @@
+[project]
+name = "ryu-unsloth-sidecar"
+version = "0.1.0"
+description = "Ryu's Core-managed Unsloth fine-tuning sidecar (LoRA/QLoRA training runtime)"
+requires-python = ">=3.10"
+# Base server deps only. The heavy training stack (unsloth + torch + CUDA + trl)
+# is an optional extra so the server boots and serves /health on any machine; a
+# missing training dep turns into a clear per-job error, never a boot crash.
+dependencies = [
+    # FastAPI 0.133 is the first release that accepts Starlette 1.x; Starlette 1.3.1
+    # fixes the multipart, Range, Host/path-reconstruction, and HTTPEndpoint advisories
+    # (PYSEC-2026-161/248/249/1941/1942/1943/2280/2281) every older floor admitted.
+    "fastapi>=0.133.0",
+    "starlette>=1.3.1",
+    "uvicorn>=0.29",
+    "pydantic>=2.7.0",
+    "anyio>=4.14.2",
+]
+
+[project.optional-dependencies]
+# Test-only HTTP client for FastAPI's in-process smoke harness. It is not part
+# of the shipped runtime image, which only needs the base server dependencies.
+test = ["httpx>=0.27"]
+# `pip install -e ".[train]"` — the training stack. Unsloth pulls torch,
+# transformers, peft, bitsandbytes; install the CUDA-matched torch first
+# (Core's external_runtime handles per-machine CUDA matching at spawn).
+# TRL is pinned to a range matching both trainer paths: `SFTConfig` owns the
+# dataset fields, and `DPOTrainer(processing_class=...)` handles preference pairs.
+# Keep this window until a real GPU run verifies an upgrade.
+# datasets 5.0.1 fixes the folder-builder path traversal (PYSEC-2026-3716); the trainer only
+# uses Dataset.from_list/from_dict. datasets only caps fsspec from above (5.0.1 allows
+# >=2023.1.0,<=2026.6.0) and sets no patched floor, so the fsspec 2026.6.0 fix for
+# PYSEC-2026-4217 is required explicitly here.
+train = ["unsloth", "trl>=0.12.1,<0.16", "datasets>=5.0.1", "fsspec>=2026.6.0"]
+
+[project.scripts]
+ryu-unsloth = "ryu_unsloth.__main__:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["ryu_unsloth"]
